@@ -1,0 +1,14 @@
+#deny from all
+#php_value max_execution_time 5
+Options +FollowSymLinks
+RewriteEngine On
+
+
+RewriteRule ^panel$ https://wisee.com.ar/THERMOCLOUD 
+RewriteRule ^Panel$ https://wisee.com.ar/THERMOCLOUD 
+RewriteRule ^Panel$ http://wisee.com.ar/THERMOCLOUD 
+RewriteRule ^panel$ http://wisee.com.ar/THERMOCLOUD 
+RewriteRule ^thermocloud$ https://wisee.com.ar/THERMOCLOUD 
+RewriteRule ^Thermocloud$ https://wisee.com.ar/THERMOCLOUD 
+RewriteRule ^dashboard$ https://wisee.com.ar/THERMOCLOUD 
+RewriteRule ^ayuda$ https://wisee.com.ar/THERMOCLOUD/ayuda.html 
