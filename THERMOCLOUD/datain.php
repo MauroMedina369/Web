@@ -1,0 +1,120 @@
+<?php  
+//header('Access-Control-Allow-Origin: *');
+
+//use Symfony\Component\HttpClient\HttpClient;
+
+include "config.php";
+ini_set('max_execution_time', 5); 
+error_reporting(1);
+    $limitmaxHR=0;
+    $limitminHR=0;
+    $DeviceID = $_GET['DeviceID'];    
+    $Temp = $_GET['Temp'];
+    $HR = $_GET['HR'];
+    $Soil = $_GET['soil'];
+    $limitmax = $_GET['limitmax'];
+    $limitmaxHR = $_GET['limitmaxHR'];        
+    $limitmin = $_GET['limitmin'];
+    $limitminHR = $_GET['limitminHR'];        
+    $limitmaxPPM = $_GET['limitmaxPPM'];     
+    $Alarm = $_GET['Alarm'];   
+    $Version = $_GET['Version'];    
+    
+    $Fecha= _GetDate();
+    $Hora =_GetTime();    
+
+    if (($Temp == "1.0") && ($HR=="0")) {logmsg("Temp is 1.0 y HR es 0"); return;}
+    if (($Temp=="nan") || ($Temp=="")) {logmsg("Temp is nan"); return;}
+    if (($HR=="nan") || ($HR==""))  {logmsg("HR is nan"); return;}
+    
+    if ($Soil=="") { //Si no hay dato enviado de humedad de tierra
+      //$ValoresString2 = "`DeviceID` = '".$DeviceID."',`Temp` =  '".number_format($Temp,1)."',`HR` =  '".number_format($HR,0)."',`Soil` =  '-1',`Fecha` = '".$Fecha."',`Hora` = '".$Hora."'";    
+      $ValoresString = "'".$DeviceID . "','" .  number_format($Temp,1) . "','" . number_format($HR,0). "','"  .$Fecha."','" . $Hora. "'"  ;
+      $querystr = "INSERT INTO  datos (DeviceID, Temp , HR, Fecha,Hora) VALUES (".$ValoresString.") ON DUPLICATE KEY UPDATE `DeviceID` =  '".$DeviceID."'"; 
+      //$querystr = "INSERT INTO  datos (DeviceID, Temp , HR, Fecha,Hora) VALUES (".$ValoresString.")";
+    } else{
+      //$ValoresString2 = "`DeviceID` = '".$DeviceID."',`Temp` =  '".number_format($Temp,1)."',`HR` =  '".number_format($HR,0)."',`Soil` =  '".number_format($Soil,0)."',`Fecha` = '".$Fecha."',`Hora` = '".$Hora."'";    
+      $ValoresString = "'".$DeviceID . "','" .  number_format($Temp,1) . "','" . number_format($HR,0). "','" . number_format($Soil,0). "','"  .$Fecha."','" . $Hora. "'"  ;
+      $querystr = "INSERT INTO  datos (DeviceID, Temp , HR, Soil, Fecha,Hora) VALUES (".$ValoresString.") ON DUPLICATE KEY UPDATE `DeviceID` =  '".$DeviceID."'"; 
+      //$querystr = "INSERT INTO  datos (DeviceID, Temp , HR, Soil, Fecha,Hora) VALUES (".$ValoresString.")" ;
+      
+    }
+    $resultado=InsertDBMySQL($querystr);
+    //logmsg($resultado);
+    if ($resultado == -1) echo "ERROR -1";
+
+
+    if ($Soil=="") {
+       $querystr = "UPDATE ajustes SET Configuration=0, LastUpdateFecha = '" . $Fecha. "', LastUpdateHora = '" . $Hora. "', Version = '" . $Version. "', CurrentTemp = '" . number_format($Temp,1). "', CurrentHR = '" . number_format($HR,0). "',State='1', TempLimitMenor = '" . $limitmin . "', TempLimitMayor = '" . $limitmax . "', HRLimitMenor = '" . $limitminHR . "', HRLimitMayor = '" . $limitmaxHR .  "', PPMLimitMax = '" . $limitmaxPPM ."' WHERE DeviceID = '". $DeviceID."'";
+    }else{
+      $querystr = "UPDATE ajustes SET Configuration=0, LastUpdateFecha = '" . $Fecha. "', LastUpdateHora = '" . $Hora. "', Version = '" . $Version. "', CurrentTemp = '" . number_format($Temp,1). "', CurrentHR = '" . number_format($HR,0). "', CurrentSoil = '" . number_format($Soil,0). "',State='1', TempLimitMenor = '" . $limitmin . "', TempLimitMayor = '" . $limitmax . "', HRLimitMenor = '" . $limitminHR . "', HRLimitMayor = '" . $limitmaxHR .  "', PPMLimitMax = '" . $limitmaxPPM ."' WHERE DeviceID = '". $DeviceID."'";
+    }  
+    //if (InsertDBMySQL($querystr) == -1) echo "ERROR -1";
+    $resultado=InsertDBMySQL($querystr);
+    //logmsg($resultado);
+    if ($resultado == -1) echo "ERROR -1";
+    
+    $querystr = "Select * from ajustes where DeviceID = '".$DeviceID."'";   
+    $row=SelectMultiDB($querystr);
+    echo json_encode($row[0], JSON_FORCE_OBJECT);   
+    $DeviceName = $row[0]["DeviceName"];
+    $EnabledAlerts= $row[0]["EnabledAlerts"];
+    // logmsg("Alarm : " . $Alarm);
+    // logmsg("Caracteres Alarm: " . strlen($Alarm));
+    if (strlen($Alarm) == 0) return;
+    if ($EnabledAlerts == "0") return;
+
+    if ($Alarm != "0"){
+        $Email = $row[0]["Email"];
+     //   logmsg("Email del dispositivo: " . $Email);
+        if ($Alarm == "MaxTemp" || $Alarm == "MinTemp")  $Value=$Temp;
+        if ($Alarm == "MaxGas" )  $Value=$Temp;
+        if ($Alarm == "MaxHR" || $Alarm == "MinHR")  $Value=$HR;
+        if ($Alarm == "MinSoil" )  $Value=$Soil;
+      //  logmsg("Se insertó una nueva alerta");
+        $ValoresString = "'".$DeviceID . "','" .  number_format($Value,1) . "','" . $Alarm. "','"  .$Fecha."','" . $Hora. "','0','1','". $Email ."'" ;
+        $ValoresString2 = "`DeviceID` = '".$DeviceID."',`VAlue` =  '".number_format($Value,1)."',`Type` =  '".$Alarm."',`Fecha` = '".$Fecha."',`Hora` = '".$Hora."'";     
+        $querystr = "INSERT INTO  alarms (DeviceID, Value , Type ,Fecha,Hora, Viewed,Emailed,Email) VALUES (".$ValoresString.") ON DUPLICATE KEY UPDATE ".$ValoresString2;          
+        InsertDBMySQL($querystr);    
+
+        // ENVIA MAIL DE NOTIFICACION
+        $url = "http://wisee.com.ar/THERMOCLOUD/sendmail.php?Email=". $Email . "&Title=" .$Title . "&Alarm=" .$Alarm . "&Value=" .$Value . "&DeviceID=" .$DeviceID. "&DeviceName=" .$DeviceName;        
+        $url2= str_replace(" ","_",$url);
+       // logmsg($url2);
+        $curl = curl_init($url2);
+        curl_setopt($curl, CURLOPT_URL, $url2);
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+
+        $headers = array(
+        "Accept: */*","Content-Type: text/plain", "charset=\"UTF-8\""
+        );
+
+        curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
+        //for debug only!
+        curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
+        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+
+        $resp = curl_exec($curl);
+        curl_close($curl);
+        //ENVIA MAIL DE TELEGRAM
+        $querystr= "Select * from telegram where DeviceID = '". $DeviceID ."'";
+        $db =  ConnectMySQL();
+        $sql = $db->prepare($querystr); 
+        $sql->execute(); 
+        while($row= $sql->fetch(PDO::FETCH_ASSOC)){
+          //logmsg("Envía mensaje de Telegram a: " . $row["channelid"] . " / Equipo: ". $row["DeviceID"]); 
+          if ($Alarm == "MaxGas") $Message= "Se ha superado el valor de PPM  en el equipo ". $DeviceName . " (ID#: " . $DeviceID."). El valor registrado fue de <strong>" .$Value. " °C </strong>."; 
+          if ($Alarm == "MaxTemp") $Message= "Se ha superado la temperatura en el equipo ". $DeviceName . " (ID#: " . $DeviceID.") . El valor registrado fue de " .$Value. " °C."; 
+          if ($Alarm == "MaxHR") $Message= "Se ha superado la humedad en el equipo ". $DeviceName . " (ID#: " . $DeviceID."). El valor registrado fue de " .$Value. " %.";
+          if ($Alarm == "MinTemp") $Message= "Se ha alcanzado el valor inferior de temperatura en el equipo ". $DeviceName . " (ID#: " . $DeviceID."). El valor registrado fue de " .$Value. " °C.";
+          if ($Alarm == "MinHR") $Message= "Se ha alcanzado el valor  inferior de humedad en el equipo ". $DeviceName . " (ID#: " . $DeviceID."). El valor registrado fue de " .$Value. " %.";          
+          if ($Alarm == "MinSoil") $Message= "Se necesita RIEGO en ". $DeviceName . " (ID#: " . $DeviceID."). El valor registrado fue de " .$Value. " %.";          
+          sendTelegramMessage($row["channelid"],$Message);       
+        }   
+        $db= null;
+        $sql = null; // obligado para cerrar la conexión           
+    }    
+
+
+
+?>

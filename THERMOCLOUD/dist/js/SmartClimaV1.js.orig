@@ -1,0 +1,592 @@
+//Library Wisee v1 asd
+var deviceID;
+var deviceName;
+var deviceList;
+var deviceListNumber=1;
+var userList;
+var alertList;
+var start=0;
+var lineChartData="a";
+var historicdata;
+var canvas = document.getElementById('canvas');
+
+$(document).ready(function () {
+    // Initialize GaugeMeter plugin                    
+    $("#GaugeTemp").data("percent", 10);
+    $("#GaugeTemp").empty();
+    $("#GaugeTemp").gaugeMeter();    
+    $("#GaugeHR").data("percent", 20);
+    $("#GaugeHR").empty();
+    $("#GaugeHR").gaugeMeter();
+    //$('#asistente1').modal('show');  
+     GetClimaDev(); 
+     GetUsers();
+     GetAlerts();
+    
+
+    
+});
+
+
+
+/////////////////////////////////////////////////////////////////////////
+var GetAlerts = function (visto) {
+    //var p = md5(password);
+    var retorno = $.getJSON("get-alerts.php", {                                  
+         Visto: visto 
+    });
+    return retorno ;
+};
+
+GetAlerts().done(function (response) {
+        //  ahoraOBJ = parseJSON(response.datos);
+        //var datos=JSON.parse(response.responseText);
+        var out =  response;    
+        alertList=out;    
+        FillAlerts(out);
+        return out;
+    }).fail(function (jqXHR, textStatus, errorThrown) {
+        swal("Ups!","Algun error obteniendo los dispositivos " +textStatus);
+    });         
+    
+/////////////////////////////////////////////////////////////////////
+function FillAlerts (ul) {
+
+    var a=1;
+    var htmlstr="";
+    var htmlstr2="";
+    var b=1;
+    var count=0;
+    while (ul[a] != undefined){            
+        var Hora = ul[a].Hora;
+        var Fecha = MuestraFechaSTR(ul[a].Fecha) +" a las " + MuestraHoraSTR(Hora);
+        var Titulo = "Alerta de "+ul[a].DeviceID+ " | " + ul[a].Tipo;
+        var Mensaje = "Valor: " +ul[a].Valor;    
+        if (ul[a].Visto == '0') { 
+            htmlstr = htmlstr + '<a class="message-item d-flex align-items-center border-bottom " ><div class="btn btn-danger rounded-circle btn-circle"><i  class=" fas fa-exclamation text-white"></i></div><div class="w-75 d-inline-block v-middle pl-2">        <h6 class="message-title mb-0 mt-1">'+Titulo+'</h6>        <span class="font-12 text-nowrap d-block text-muted">'+Mensaje+'</span><span class="font-12 text-nowrap d-block text-muted">'+ Fecha +' </span></div></a>'; 
+             count++;      
+        }
+        htmlstr2 = htmlstr2 + '<a  class="message-item d-flex align-items-center border-bottom " ><div class="btn btn-danger rounded-circle btn-circle"><i  class=" fas fa-exclamation text-white"></i></div><div class="w-75 d-inline-block v-middle pl-2">        <h6 class="message-title mb-0 mt-1">'+Titulo+'</h6>        <span class="font-12 text-nowrap d-block text-muted">'+Mensaje+'</span><span class="font-12 text-nowrap d-block text-muted">'+ Fecha +' </span></div></a>';        
+        a++;
+    }    
+    
+    document.getElementById('listadoalertstxt2').innerHTML= htmlstr2; //Centro de alertas
+    if (count >=1){
+        document.getElementById('listadoalertstxt').innerHTML= htmlstr;  //Alertas barra superior        
+        document.getElementById('cantalertstxt').innerText= count;    
+    } else {
+        document.getElementById('cantalertstxt').style.opacity = 0;
+    }
+    
+}    
+
+/////////////////////////////////////////////////////////////////////////
+var GetUsers = function () {
+    //var p = md5(password);
+    var retorno = $.getJSON("get-users.php", {                         
+        // Email: uname,
+        // Password: pwd,
+    });
+    return retorno ;
+};
+
+GetUsers().done(function (response) {
+        //  ahoraOBJ = parseJSON(response.datos);
+        //var datos=JSON.parse(response.responseText);
+        userList= response;        
+        FillUsers(userList);
+        return userList;
+    }).fail(function (jqXHR, textStatus, errorThrown) {
+        swal("Ups!","Algun error obteniendo los dispositivos " +textStatus);
+    });          
+
+/////////////////////////////////////////////////////////////////////
+function FillUsers (ul) {
+    document.getElementById('emailtxt').value= ul[1].Email;
+    document.getElementById('nametxt').innerHTML= ul[1].Name;
+    document.getElementById('nombretxt').value= ul[1].Name;
+    document.getElementById('apellidotxt').value= ul[1].LastName;
+    document.getElementById('pass1').value= "";
+}
+
+/////////////////////////////////////////////////////////////////////////
+var GetClimaDev = function () {
+    //var p = md5(password);
+    var retorno = $.getJSON("get-devices.php", {                         
+        // Email: uname,
+        // Password: pwd,
+    });
+    return retorno ;
+};
+
+GetClimaDev().done(function (response) {
+        //  ahoraOBJ = parseJSON(response.datos);
+        //var datos=JSON.parse(response.responseText);
+        var out =  response;    
+        deviceList=out;    
+        FillSelectDevice(out);
+        GetData(deviceList[deviceListNumber].DeviceID);
+        return out;
+    }).fail(function (jqXHR, textStatus, errorThrown) {
+        swal("Ups!","Algun error obteniendo los dispositivos " +textStatus);
+    });          
+
+
+    /////////////////////////////////////////////////////////////////////////
+function GetData(dev) {
+    var GetHistorialDev = function () {
+        //var p = md5(password);
+        var retorno = $.getJSON("get-graphicdata.php", {                         
+             DeviceID: dev,
+        });
+        return retorno ;
+    };
+    
+    GetHistorialDev().done(function (response) {
+            //  ahoraOBJ = parseJSON(response.datos);
+            //var datos=JSON.parse(response.responseText);
+            var out =  response;    
+            historicdata=out;    
+            ShowGraphic(historicdata);
+            return out;
+        }).fail(function (jqXHR, textStatus, errorThrown) {
+            swal("Ups!","Algun error obteniendo los dispositivos " +textStatus);
+        });          
+    
+    
+}
+
+    /////////////////////////////////////////////////////
+function FillSelectDevice(datos){ //carga los dispositivos en la barra izquierda y llama a "SelectDevice()"
+    var a=1;
+    var htmlstr= '<h4 class="text-left text-dark" style="margin-top:0px;margin-left:20px"> Wisee Clima</h4>';
+    var htmlstr2= '<h4 class="text-left text-dark" style="margin-top:20px;margin-left:20px"> Wisee Clima</h4>';
+    while (datos[a] != undefined){            
+        //swal("MSG:" + datos[a].DeviceID + "   ");
+        var onclick = "SelectDevice("+a+")" ;
+        var color = "danger";
+        var color2 = "danger";
+        var color3 = "danger";
+        if (datos[a].State == '1') {color = "success";}
+        if (datos[a].Color1 == '1') {color2 = "success";}
+        if (datos[a].Color2 == '1') {color3 = "success";}
+        if (datos[a].Color1 == '2') {color2 = "primary";}
+        if (datos[a].Color2 == '2') {color3 = "primary";}        
+        // htmlstr = htmlstr + '<a class="clase1 message-item d-flex align-items-center border-bottom px-3 py-2 " onclick='+onclick+' ><div class="btn btn-'+color+ ' rounded-circle btn-circle"><i  class="fas fa-wifi text-white"></i></div><div class="w-75 d-inline-block v-middle pl-2">        <h6 class="message-title mb-0 mt-1">'+datos[a].DeviceName+' | ' + datos[a].Description+ ' </h6>        <span class="font-12 text-nowrap d-block text-muted"> ID #'+datos[a].DeviceID+'</span><span class="font-12 text-nowrap d-block text-muted"> </span></div></a>';
+        htmlstr=htmlstr +  '<table style="width:100%" class="clase2"> <tr style="width:100%" class="border-bottom" > <td style="width:90%"> <a class="clase1   align-items-center px-3 py-2" onclick='+onclick+'  > <i  class="fas fa-wifi text-'+color+ '"></i> <div class="w-75 d-inline-block v-middle pl-2"> <h6 class="message-title mb-0 mt-1">'+datos[a].DeviceName+' | ' + datos[a].Description+ ' </h6> <span class="font-12 text-nowrap d-block text-muted"> ID #'+datos[a].DeviceID+'</span>  </div> </a> </td> <td style="width:20%;min-width:70px" class="border-left text-center"><i  class="fas fa-thermometer-half text-'+color2+ ' "></i> '+ datos[a].Value1 +'°C </td> <td style="width:20%;min-width:70px" class="border-left text-center border-right"><i  class="fas fa-tint text-'+color3+ '"></i>  '+datos[a].Value2+'%   </td>    </tr>  </table>';
+        htmlstr2 = htmlstr2 + '<table style="width:100%" class="clase2"> <tr style="width:100%" class="border-bottom" > <td style="width:90%"> <a class="clase1   align-items-center px-3 py-2" onclick='+onclick+'  > <i  class="fas fa-wifi text-'+color+ '"></i> <div class="w-75 d-inline-block v-middle pl-2"> <h6 class="message-title mb-0 mt-1">'+datos[a].DeviceName+' | ' + datos[a].Description+ ' </h6> <span class="font-12 text-nowrap d-block text-muted"> ID #'+datos[a].DeviceID+'</span>  </div> </a> </td> <td style="width:20%;min-width:70px" class="border-left text-center"><i  class="fas fa-thermometer-half text-'+color2+ ' "></i> '+ datos[a].Value1 +'°C </td> <td style="width:20%;min-width:70px" class="border-left text-center border-right"><i  class="fas fa-tint text-'+color3+ '"></i>  '+datos[a].Value2+'%   </td>    </tr>  </table>';
+
+a++;
+    }
+    
+    deviceID = datos[deviceListNumber].DeviceID;    
+    deviceName = datos[deviceListNumber].DeviceName;
+    document.getElementById('devicelist-modaldata').innerHTML = htmlstr; 
+    document.getElementById('devicelist-pagedata').innerHTML = htmlstr2;
+    SelectDevice(deviceListNumber);    
+}
+
+////////////////////////////////////////////////////////
+function SelectDevice(_deviceListNumber){ //modifica valores de seleccion de dispositivo y alertas     
+    deviceListNumber=_deviceListNumber;
+    if (deviceList.responseText == undefined) {
+     var datos= deviceList;   
+    } else {
+     var datos = JSON.parse(deviceList.responseText);
+    }    
+    var count = Object.keys(datos).length -1;
+    var color ="text-danger";
+    if (datos[deviceListNumber].State == '1') {color = "text-success";}
+    deviceID= datos[deviceListNumber].DeviceID;
+    document.getElementById('descriptiontxt').value= datos[deviceListNumber].Description;
+    document.getElementById('MainDescriptiontxt').innerText='ID #' + datos[deviceListNumber].DeviceID;
+
+    document.getElementById('devtxt').innerHTML = "Dispositivo <strong> " +  deviceID + " </strong>";
+    //document.getElementById('deviceListFirst').innerHTML =datos[deviceListNumber].DeviceName;   
+    document.getElementById('devicestate').innerHTML='<i class="fas fa-wifi fa-2x '+color+'" style="position:absolute"></i><strong style="margin-left:50px;position:relative"> '+ datos[deviceListNumber].DeviceName + '</strong> | <a style="font-size:12px">'+datos[deviceListNumber].Description +'</a>';
+ 
+
+    if (datos[deviceListNumber].EnabledAlerts =="1") document.getElementById("enabledAlertschk").checked = true;
+    else document.getElementById("enabledAlertschk").checked = false;        
+    $('#devicelist-modal').modal('hide');  
+    if (start == 1) {
+        document.getElementById("misdispositivos").style.display="none";
+       // document.getElementById("devicestate").style.display="block";                  
+       // document.getElementById("maindiv").style.display="block";
+        //document.getElementById("mainpage").style.display="block";
+        //document.getElementById("DivGraphicDay").style.display="block";
+        //document.getElementById("MainDescriptiontxt").style.display="block";
+    } else {
+        document.getElementById("misdispositivos").style.display="block";
+       // document.getElementById("devicestate").style.display="none";
+      //  document.getElementById("maindiv").style.display="none";
+       // document.getElementById("DivGraphicDay").style.display="none";
+      //  document.getElementById("mainpage").style.display="none";
+      //  document.getElementById("MainDescriptiontxt").style.display="none";
+        start=1; //se utiliza para saber si es la primera vez que se carga la pagina para mostrar la lista de wisees  
+    }
+    GetData(datos[deviceListNumber].DeviceID);
+
+    document.getElementById('devnametxt').value=datos[deviceListNumber].DeviceName;
+
+    try {
+        document.getElementById('quantity1').value=datos[deviceListNumber].TempLimitMenor;
+        document.getElementById('quantity2').value=datos[deviceListNumber].TempLimitMayor;
+        document.getElementById('quantity3').value=datos[deviceListNumber].HRLimitMenor;
+        document.getElementById('quantity4').value=datos[deviceListNumber].HRLimitMayor;           
+    }catch(error){
+
+    }
+}
+
+
+/////////////////////////////////////////////////////////
+function ModifyDevClick(){
+    if (deviceList.responseText !== undefined) {
+        deviceList= JSON.parse(deviceList.responseText); 
+    }   
+  
+     var desc=document.getElementById('descriptiontxt').value;                        
+     var name=document.getElementById('devnametxt').value;
+     deviceList[deviceListNumber].DeviceName = name;  
+     deviceList[deviceListNumber].Description = desc;                    
+ 
+     FillSelectDevice(deviceList);
+        if (deviceID != ""){
+            var ModifyDev = function () {
+                var retorno = $.getJSON("modify-device.php", {                         
+                    DeviceID: deviceID,
+                    Description: desc,
+                    DeviceName: name
+                });
+                return retorno ;
+            };
+
+            ModifyDev().done(function (response) {
+                // document.getElementById('adddevicetxt').value="";
+                 var datos = response;
+                 if (datos =="OK") {
+                    swal('',"Se actualizaron los datos correctamente", 'success');
+
+                 }                            
+            }).fail(function (jqXHR, textStatus, errorThrown) {
+                swal("Ups!","Algun error al agregar el dispositivo " +textStatus);
+            });   
+        }
+}   
+
+////////////////////////////////////////////////////////////
+function misdispositivosClick(){
+    document.getElementById("misdispositivos").style.display="block";
+    document.getElementById("mainpage").style.display="none";
+}
+
+//////////////////////////////////////////////////////////
+function clearalerts(){
+    document.getElementById('cantalertstxt').style.opacity = 0;
+    document.getElementById('cantalertstxt').innerText = '0';
+
+    var _ClearAlerts = function () {
+        //var p = md5(password);
+        var retorno = $.getJSON("clear-alerts.php", {                         
+        });
+        return retorno ;
+    };    
+    _ClearAlerts().done(function (response) {
+            
+        }).fail(function (jqXHR, textStatus, errorThrown) {
+           // swal("Ups!","Algun error obteniendo los dispositivos " +textStatus);
+        });    
+}
+
+function ShowGraphic(datain){    
+    var dataValue = datain.Temp;
+    var dataValue2 = datain.HR;
+    var labels =datain.Etiqueta;
+    if (lineChartData !== "a") lineChartData.datasets.splice(0, 1);
+    lineChartData = {
+        labels: labels,    
+        datasets: [{
+            label: 'Temperatura',
+            borderColor: '#5F76E8',
+            backgroundColor: '#5F76E8',      
+            fill: true,
+            data: dataValue,
+            yAxisID: 'y-axis-1',
+        }, {
+            label: 'Humedad',
+            borderColor: '#01CAF1',
+            backgroundColor: '#01CAF1',
+            fill: false,
+            data: dataValue2,
+            yAxisID: 'y-axis-2'
+        }]
+    };
+
+    var ctx = document.getElementById('canvas').getContext('2d');
+    window.myLine = Chart.Line(ctx, {
+        data: lineChartData,
+        options: {
+            responsive: true,
+            hoverMode: 'index',
+            stacked: false,
+            title: {
+                display: true,
+                text: ''
+            },
+            scales: {
+                yAxes: [{
+                    type: 'linear', // only linear but allow scale type registration. This allows extensions to exist solely for log scale for instance
+                    display: true,
+                    position: 'left',
+                    id: 'y-axis-1',
+                    ticks: {
+                        maxTicksLimit: 5,
+                        padding: 10,
+                        // Include a dollar sign in the ticks
+                        callback: function (value, index, values) {
+                            return number_formatDiario(value);
+                        }   
+                    }                 
+                }, {
+                    type: 'linear', // only linear but allow scale type registration. This allows extensions to exist solely for log scale for instance
+                    display: true,
+                    position: 'right',
+                    id: 'y-axis-2',
+                    ticks: {
+                        maxTicksLimit: 5,
+                        padding: 10,
+                        // Include a dollar sign in the ticks
+                        callback: function (value, index, values) {
+                            return number_formatDiario2(value);
+                        }   
+                    }    ,
+                    // grid line settings
+                    gridLines: {
+                        drawOnChartArea: false, // only want the grid lines for one axis to show up
+                    },
+                }],
+            }
+        }
+    }); 
+    
+     //var DayChart = new Chart.Line(canvas, datagra);
+
+     //ctx.update();        
+}
+
+// //////////////////////////////////////////////////////////
+// function ShowGraphic(datain){
+//     var dataValue = datain.Temp;
+//     var dataValue2 = datain.HR;
+//     var labels =datain.Etiqueta;    
+//     canvas = document.getElementById("canvas");
+//     if (datagra !== "a") datagra.data.datasets.splice(0, 1);
+//     datagra = {
+//         type: 'line', data: {
+//             labels: labels,
+//             datasets: [{
+//                 label: "",
+//                 lineTension: 0.3,
+//                 backgroundColor: "rgb(212, 221, 247,0.3)",
+//                 borderColor: "#2043ac",
+//                 pointRadius:0,
+//                 pointBackgroundColor: "rgba(78, 115, 223, 1)",
+//                 pointBorderColor: "#2043ac",
+//                 pointHoverRadius: 1,
+//                 pointHoverBackgroundColor: "rgba(78, 115, 223, 1)",
+//                 pointHoverBorderColor: "rgba(78, 115, 223, 1)",
+//                 pointHitRadius: 10,
+//                 pointBorderWidth: 2,
+//                 data: dataValue
+//             }]
+//         }, options: {
+//             maintainAspectRatio: false,
+//             bezierCurve: true,
+//             layout: {
+//                 padding: {
+//                     left: 5,
+//                     right: 5,
+//                     top: 25,
+//                     bottom: 0
+//                 }
+//             },
+//             scales: {
+//                 xAxes: [{
+//                     time: {
+//                         unit: 'date'
+//                     },
+//                     gridLines: {
+//                         display: false,
+//                         drawBorder: false
+//                     },
+//                     ticks: {
+//                         maxTicksLimit: 24
+//                     }
+//                 }],
+//                 yAxes: [{
+//                     ticks: {
+//                         maxTicksLimit: 5,
+//                         padding: 10,
+//                         // Include a dollar sign in the ticks
+//                         callback: function (value, index, values) {
+//                             return number_formatDiario(value);
+
+//                         }
+//                     },
+//                     gridLines: {
+//                         color: "rgb(234, 236, 244)",
+//                         zeroLineColor: "rgb(234, 236, 244)",
+//                         drawBorder: false,
+//                         borderDash: [2],
+//                         zeroLineBorderDash: [2]
+//                     }
+//                 }]
+//             },
+//             legend: {
+//                 display: false
+//             },
+//             tooltips: {
+//                 backgroundColor: "rgb(255,255,255)",
+//                 bodyFontColor: "#858796",
+//                 titleMarginBottom: 10,
+//                 titleFontColor: '#6e707e',
+//                 titleFontSize: 14,
+//                 borderColor: '#dddfeb',
+//                 borderWidth: 1,
+//                 xPadding: 5,
+//                 yPadding: 15,
+//                 displayColors: true,
+//                 intersect: false,
+//                 mode: 'index',
+//                 caretPadding: 10,
+//                 callbacks: {
+//                     label: function (tooltipItem, chart) {
+//                         var datasetLabel = chart.datasets[tooltipItem.datasetIndex].label || '';
+//                         return datasetLabel + number_formatDiario(tooltipItem.yLabel);
+//                     }
+//                 }
+//             }
+//         }
+//     };
+
+//     var DayChart = new Chart.Line(canvas, datagra);
+
+//     DayChart.update();    
+// }
+
+
+//////////////////////////////////////////////////////////////////////////////////
+function MuestraFechaSTR(_in) {
+    var año = _in.substring(0, 4);
+    var mes = _in.substring(4, 6);
+    var dia = _in.substring(6, 8);
+
+    return dia + "/" + mes + "/" + año;
+}
+
+
+//////////////////////////////////////////////////////////////////////////////////
+function MuestraHoraSTR(_in) {
+    hora = _in.substring(0, 2);
+    min = _in.substring(2, 4);   
+    return hora + ":" + min;
+}
+
+
+/////////////////////////////////////////////////////////////////////////////////////
+function objlen(obj) {
+    var result = 0;
+    for(var prop in obj) {
+      if (obj.hasOwnProperty(prop)) {
+      // or Object.prototype.hasOwnProperty.call(obj, prop)
+        result++;
+      }
+    }
+    return result;
+  }
+
+
+  
+//////////////////////////////////////// CHARTS
+//Chart.defaults.global.defaultFontFamily = 'Nunito', '-apple-system,system-ui,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif';
+//Chart.defaults.global.defaultFontColor = '#858796';
+
+
+function number_formatDiario(number, decimals, dec_point, thousands_sep) {
+    // *     example: number_format(1234.56, 2, ',', ' ');
+    // *     return: '1 234,56'
+    var tipoDiario=1;
+    decimals = 1;
+    number = (number + '').replace(',', '').replace(' ', '');
+    var n = !isFinite(+number) ? 0 : +number,
+        prec = !isFinite(+decimals) ? 0 : Math.abs(decimals),
+        sep = (typeof thousands_sep === 'undefined') ? ',' : thousands_sep,
+        dec = (typeof dec_point === 'undefined') ? '.' : dec_point,
+        s = '',
+        toFixedFix = function (n, prec) {
+            var k = Math.pow(10, prec);
+            var _resultado;
+            if (tipoDiario === 1) {
+                return  Math.round(n * k) / k +'°C ' ;
+            }
+            if (tipoDiario === 2) {
+
+                _resultado = Math.round(n * k) / k;
+                _resultado = _resultado;
+                return _resultado.toFixed(1) + ' %';
+            }
+
+
+        };
+
+    // Fix for IE parseFloat(0.55).toFixed(0) = 0;
+    s = (prec ? toFixedFix(n, prec) : '' + Math.round(n)).split('.');
+    if (s[0].length > 3) {
+        s[0] = s[0].replace(/\B(?=(?:\d{3})+(?!\d))/g, sep);
+    }
+    if ((s[1] || '').length < prec) {
+        s[1] = s[1] || '';
+        s[1] += new Array(prec - s[1].length + 1).join('');
+    }
+    return s;
+}
+
+function number_formatDiario2(number, decimals, dec_point, thousands_sep) {
+    // *     example: number_format(1234.56, 2, ',', ' ');
+    // *     return: '1 234,56'
+    var tipoDiario=1;
+    decimals = 1;
+    number = (number + '').replace(',', '').replace(' ', '');
+    var n = !isFinite(+number) ? 0 : +number,
+        prec = !isFinite(+decimals) ? 0 : Math.abs(decimals),
+        sep = (typeof thousands_sep === 'undefined') ? ',' : thousands_sep,
+        dec = (typeof dec_point === 'undefined') ? '.' : dec_point,
+        s = '',
+        toFixedFix = function (n, prec) {
+            var k = Math.pow(10, prec);
+            var _resultado;
+            if (tipoDiario === 1) {
+                return  Math.round(n * k) / k +'% ' ;
+            }
+            if (tipoDiario === 2) {
+
+                _resultado = Math.round(n * k) / k;
+                _resultado = _resultado;
+                return _resultado.toFixed(1) + ' %';
+            }
+
+
+        };
+
+    // Fix for IE parseFloat(0.55).toFixed(0) = 0;
+    s = (prec ? toFixedFix(n, prec) : '' + Math.round(n)).split('.');
+    if (s[0].length > 3) {
+        s[0] = s[0].replace(/\B(?=(?:\d{3})+(?!\d))/g, sep);
+    }
+    if ((s[1] || '').length < prec) {
+        s[1] = s[1] || '';
+        s[1] += new Array(prec - s[1].length + 1).join('');
+    }
+    return s;
+}
