@@ -45,16 +45,16 @@ error_reporting(1);
 
 
     if ($Soil=="") {
-       $querystr = "UPDATE ajustes SET Configuration=0, LastUpdateFecha = '" . $Fecha. "', LastUpdateHora = '" . $Hora. "', Version = '" . $Version. "', CurrentTemp = '" . number_format($Temp,1). "', CurrentHR = '" . number_format($HR,0). "',State='1', TempLimitMenor = '" . $limitmin . "', TempLimitMayor = '" . $limitmax . "', HRLimitMenor = '" . $limitminHR . "', HRLimitMayor = '" . $limitmaxHR .  "', PPMLimitMax = '" . $limitmaxPPM ."' WHERE DeviceID = '". $DeviceID."'";
+       $querystr = "UPDATE devices SET Configuration=0, LastUpdateFecha = '" . $Fecha. "', LastUpdateHora = '" . $Hora. "', Version = '" . $Version. "', CurrentTemp = '" . number_format($Temp,1). "', CurrentHR = '" . number_format($HR,0). "',State='1', TempLimitMenor = '" . $limitmin . "', TempLimitMayor = '" . $limitmax . "', HRLimitMenor = '" . $limitminHR . "', HRLimitMayor = '" . $limitmaxHR .  "', PPMLimitMax = '" . $limitmaxPPM ."' WHERE DeviceID = '". $DeviceID."'";
     }else{
-      $querystr = "UPDATE ajustes SET Configuration=0, LastUpdateFecha = '" . $Fecha. "', LastUpdateHora = '" . $Hora. "', Version = '" . $Version. "', CurrentTemp = '" . number_format($Temp,1). "', CurrentHR = '" . number_format($HR,0). "', CurrentSoil = '" . number_format($Soil,0). "',State='1', TempLimitMenor = '" . $limitmin . "', TempLimitMayor = '" . $limitmax . "', HRLimitMenor = '" . $limitminHR . "', HRLimitMayor = '" . $limitmaxHR .  "', PPMLimitMax = '" . $limitmaxPPM ."' WHERE DeviceID = '". $DeviceID."'";
+      $querystr = "UPDATE devices SET Configuration=0, LastUpdateFecha = '" . $Fecha. "', LastUpdateHora = '" . $Hora. "', Version = '" . $Version. "', CurrentTemp = '" . number_format($Temp,1). "', CurrentHR = '" . number_format($HR,0). "', CurrentSoil = '" . number_format($Soil,0). "',State='1', TempLimitMenor = '" . $limitmin . "', TempLimitMayor = '" . $limitmax . "', HRLimitMenor = '" . $limitminHR . "', HRLimitMayor = '" . $limitmaxHR .  "', PPMLimitMax = '" . $limitmaxPPM ."' WHERE DeviceID = '". $DeviceID."'";
     }  
     //if (InsertDBMySQL($querystr) == -1) echo "ERROR -1";
     $resultado=InsertDBMySQL($querystr);
     //logmsg($resultado);
     if ($resultado == -1) echo "ERROR -1";
     
-    $querystr = "Select * from ajustes where DeviceID = '".$DeviceID."'";   
+    $querystr = "Select * from devices where DeviceID = '".$DeviceID."'";   
     $row=SelectMultiDB($querystr);
     echo json_encode($row[0], JSON_FORCE_OBJECT);   
     $DeviceName = $row[0]["DeviceName"];

@@ -6,8 +6,8 @@
     error_reporting(E_PARSE);
     $Email =$_SESSION['Email'];   
    // logmsg($Email);
-    $querystr = "Select * from ajustes where Email = '".$Email."' order by State desc, DeviceName asc"; 
-    //$querystr = "Select * from ajustes where Email = '".$Email."' "; 
+    $querystr = "Select * from devices where Email = '".$Email."' order by LastUpdateFecha desc, LastUpdateHora desc, DeviceName asc"; 
+    //$querystr = "Select * from devices where Email = '".$Email."' "; 
     #$querystr = "Select * from Dispositivos"; 
   //  logmsg($querystr);   
 

@@ -1,4 +1,5 @@
 <?php
+error_reporting(0);
     session_start();
     $_SESSION = array(); 
     $_SESSION['auth'] = false;
@@ -120,7 +121,7 @@
                 .done(function (response) {
                     //  ahoraOBJ = parseJSON(response.datos);
                     $datos = response;
-                    if ($datos === "OK") {
+                    if ($datos === "OK") {                     
                         location.href = "dashboard.php";                        
                     } else {
                         //alert("Error de usuario o contraseña");

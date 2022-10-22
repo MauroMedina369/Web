@@ -1,24 +1,20 @@
 <?php  
-// header('Access-Control-Allow-Origin: *');
-//require 'assets/vendor/php/PHPMailerAutoload.php';
 date_default_timezone_set('America/Buenos_Aires');
-error_reporting(0);
 ini_set('max_execution_time', 10); 
 
 function ConnectMySQL()
-{
-
+{    
   $db = [
-      'host' => 'localhost',
-      'username' => 'c2091346_wiseedb',
-      'password' => 'GOrowuvu21',
-      'db' => 'c2091346_wiseedb' 
+    //   'host' => 'localhost',
+    //   'username' => 'c2091346_wiseedb',
+    //   'password' => 'GOrowuvu21',
+    //   'db' => 'c2091346_wiseedb' 
 
 
-    // 'host' => 'localhost',
-    // 'username' => 'wisee_sa',
-    // 'password' => 'Poderoso22',
-    // 'db' => 'wiseedb'     
+    'host' => 'localhost',
+    'username' => 'wisee_sa',
+    'password' => 'Poderoso22',
+    'db' => 'wiseedb'     
   ];
     try {
         $conn = new PDO("mysql:host={$db['host']};dbname={$db['db']}", $db['username'], $db['password']);

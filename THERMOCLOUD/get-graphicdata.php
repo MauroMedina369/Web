@@ -13,7 +13,7 @@
     $DateMax= $_GET['DateMax'];
     //logmsg($Email);
     if ($Email == "") return;    
-    $querystr = "Select * from ajustes where DeviceID = '".$DeviceID."'"; 
+    $querystr = "Select * from devices where DeviceID = '".$DeviceID."'"; 
 
     $db =  ConnectMySQL();
     $sql = $db->prepare($querystr); 

@@ -14,7 +14,7 @@ session_start();
     $HRLimitMenor=  $_GET['HRLimitMenor'];     
     $PPMLimitMax = $_GET['PPMLimitMax'];
     $EnabledAlerts= $_GET['EnabledAlerts'];
-    $querystr = "UPDATE ajustes SET Configuration=1, Description = '" . $Description. "' , DeviceName = '". $DeviceName ."' , Location = '". $Location ."' , PPMLimitMax = '" . $PPMLimitMax. "' , TempLimitMenor = '" . $TempLimitMenor. "', TempLimitMayor = '" . $TempLimitMayor. "', HRLimitMenor = '" . $HRLimitMenor. "', HRLimitMayor = '" . $HRLimitMayor. "', EnabledAlerts = '" . $EnabledAlerts. "' WHERE DeviceID = '". $DeviceID."' and Email = '".$Email ."'";
+    $querystr = "UPDATE devices SET Configuration=1, Description = '" . $Description. "' , DeviceName = '". $DeviceName ."' , Location = '". $Location ."' , PPMLimitMax = '" . $PPMLimitMax. "' , TempLimitMenor = '" . $TempLimitMenor. "', TempLimitMayor = '" . $TempLimitMayor. "', HRLimitMenor = '" . $HRLimitMenor. "', HRLimitMayor = '" . $HRLimitMayor. "', EnabledAlerts = '" . $EnabledAlerts. "' WHERE DeviceID = '". $DeviceID."' and Email = '".$Email ."'";
 
     InsertDBMySQL($querystr);      
     

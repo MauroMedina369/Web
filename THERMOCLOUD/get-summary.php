@@ -8,7 +8,7 @@
 
     //error_reporting( E_PARSE);
     $Email =$_SESSION['Email'];   
-    $querystr = "Select * from ajustes where Email = '".$Email."' order by State desc"; 
+    $querystr = "Select * from devices where Email = '".$Email."' order by State desc"; 
     #$querystr = "Select * from Dispositivos"; 
     //logmsg($querystr);   
 

@@ -29,16 +29,17 @@
                                                                 <p for="emailaddress1" style="margin-top:30px">Ubicación</p>
                                                             <input class="form-control" type="text" name="Description" id="locationtxt"
                                                                 required="" placeholder="Ingresá una ubicación">                                                                                                                              
-                                                                <div class="form-group mb-4" style="margin-top:30px">
+                                                                <!-- <div class="form-group mb-4" style="margin-top:30px">
                                                                     <p class="mr-sm-2" for="inlineFormCustomSelect">Modelo</p>
                                                                     <select class="custom-select mr-sm-2" id="modeltxt">
                                                                         <option value="WDS18"> WDS18</option>
                                                                         <option value="WHT22">WHT22</option>
                                                                         <option value="GAS">GAS</option>
                                                                         <option value="AIR2">AIR2</option>
+                                                                        <option value="PIXIRELAY">Pixirelay</option>
                                                                         <option value="PIXIGROW">PIXIGROW</option>
                                                                     </select>
-                                                                </div>
+                                                                </div> -->
                                                         </div>
                                                         <div class="form-group text-center">
                                                         <button class="btn btn-rounded btn-secondary pull-left" type="submit"  data-dismiss="modal" aria-label="Close">Volver</button>                                                            

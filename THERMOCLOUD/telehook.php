@@ -47,7 +47,7 @@
 
       if (substr($textoRecibido,0,7) == "SENSOR/"){
         $idAsociado= substr($textoRecibido,7);
-        $querystr = "Select * from ajustes where DeviceID = '".$idAsociado."'";     
+        $querystr = "Select * from devices where DeviceID = '".$idAsociado."'";     
         $db =  ConnectMySQL();
         $sql = $db->prepare($querystr); 
         $sql->execute(); 

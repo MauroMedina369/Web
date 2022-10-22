@@ -688,7 +688,7 @@ Stack trace:
   thrown in /home/c2091346/public_html/THERMOCLOUD/config.php on line 56
 [28-Mar-2022 14:49:33 America/Buenos_Aires] PHP Fatal error:  Uncaught Error: Call to a member function rowCount() on null in /home/c2091346/public_html/THERMOCLOUD/config.php:61
 Stack trace:
-#0 /home/c2091346/public_html/THERMOCLOUD/datain.php(31): InsertDBMySQL('UPDATE ajustes ...')
+#0 /home/c2091346/public_html/THERMOCLOUD/datain.php(31): InsertDBMySQL('UPDATE devices ...')
 #1 {main}
   thrown in /home/c2091346/public_html/THERMOCLOUD/config.php on line 61
 [28-Mar-2022 14:57:44 America/Buenos_Aires] PHP Fatal error:  Uncaught PDOException: SQLSTATE[HY000]: General error: 1205 Lock wait timeout exceeded; try restarting transaction in /home/c2091346/public_html/THERMOCLOUD/config.php:56

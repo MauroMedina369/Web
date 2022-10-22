@@ -1,6 +1,6 @@
 <?php 
 
-session_start();
+//session_start();
 include "config.php";
 //ini_set('max_execution_time', 5); 
 
@@ -315,7 +315,7 @@ options: {
 ';
 
 $Email =$_SESSION['Email'];   
-$querystr = "Select * from ajustes where Email = '".$Email."' order by State desc, DeviceName asc"; 
+$querystr = "Select * from devices where Email = '".$Email."' order by LastUpdateFecha desc, LastUpdateHora desc, DeviceName asc"; 
 $db =  ConnectMySQL();
 $sql = $db->prepare($querystr); 
 $sql->execute(); 
